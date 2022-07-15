@@ -16,23 +16,23 @@ const sequelize = new Sequelize(process.env.CONNECTION_STRING, {
 module.exports = {
     seed: (req, res) => {
         sequelize.query(`
-            drop table if exists cities;
-            drop table if exists countries;
+            DROP TABLE IF EXISTS cities;
+            DROP TABLE IF EXISTS countries;
 
-            create table countries (
-                country_id serial primary key, 
-                name varchar
+            CREATE TABLE countries (
+                country_id SERIAL PRIMARY KEY, 
+                name VARCHAR
             );
 
-            create table cities (
-                city_id serial primary key,
-                name varchar,
-                rating integer,
-                country_id integer not null references countries(country_id)
+            CREATE TABLE cities (
+                city_id SERIAL PRIMARY KEY,
+                name VARCHAR,
+                rating INTEGER,
+                country_id INTEGER NOT NULL REFERENCES countries(country_id)
             );
 
-            insert into countries (name)
-            values ('Afghanistan'),
+            INSERT INTO countries (name)
+            VALUES ('Afghanistan'),
             ('Albania'),
             ('Algeria'),
             ('Andorra'),
@@ -227,6 +227,16 @@ module.exports = {
             ('Yemen'),
             ('Zambia'),
             ('Zimbabwe');
+
+        INSERT INTO cities (name, rating, country_id)
+        VALUES ('Paris', 5, 61),
+            ('Nice', 5, 61),
+            ('Bordeaux', 4, 61),
+            ('Lyon', 3, 61),
+            ('Carcassone', 4, 61),
+            ('Toulouse', 2, 61),
+            ('Nantes', 5, 61),
+            ('Normandy', 4, 61);
         `).then(() => {
             console.log('DB seeded!')
             res.sendStatus(200)
@@ -254,12 +264,15 @@ module.exports = {
 
     getCities: (req, res) => {
         sequelize.query(`
-        SELECT ci.city_id, ci.name, ci.rating, co.country_id, co.name
+        SELECT ci.city_id, ci.name, ci.rating, co.name, co.country_id
         FROM cities AS ci
         JOIN countries AS co
-        ON ci.country_id = co.country_id;
+        ON ci.country_id = co.country_id
+        ORDER BY ci.rating desc;
         `)
-        .then(dbRes => res.status(200).send(dbRes[0]))
+        .then(dbRes => {
+            console.log(dbRes[0])
+            res.status(200).send(dbRes[0])})
         .catch(err => console.log(err))
     },
 
